@@ -322,11 +322,103 @@
       box-shadow: none;
     }
   }
+
+  /* APIキー入力画面 */
+  .api-screen {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    gap: 16px;
+  }
+
+  .api-screen.hidden { display: none; }
+
+  .api-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .api-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+  }
+
+  .api-sub {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  .api-input {
+    width: 100%;
+    border: 1.5px solid #ddd;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-family: monospace;
+    color: #333;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .api-input:focus { border-color: var(--green); }
+
+  .api-btn {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .api-btn:hover { background: var(--green-dark); }
+
+  .api-note {
+    font-size: 11px;
+    color: #bbb;
+    text-align: center;
+    line-height: 1.6;
+  }
 </style>
 </head>
 <body>
 
 <div class="phone-frame">
+
+  <!-- APIキー入力画面 -->
+  <div class="api-screen" id="apiScreen">
+    <div class="api-logo">シ</div>
+    <div class="api-title">ナンバズのシンとトーク</div>
+    <div class="api-sub">Anthropic APIキーを入力してな。<br>キーはブラウザだけに保存されるで。</div>
+    <input class="api-input" id="apiKeyInput" type="password" placeholder="sk-ant-..." />
+    <button class="api-btn" onclick="startChat()">はじめる</button>
+    <div class="api-note">APIキーは外部サーバーに送信されへん。<br>このブラウザにのみ保存されるで。</div>
+  </div>
+
   <div class="header">
     <div class="header-back">‹</div>
     <div class="header-avatars">
@@ -375,6 +467,27 @@ const SYSTEM_PROMPT = `あなたは創作お笑いコンビ「ナンバズ」の
 ・絶対に悪口にしない。愛ある後輩評
 ・出力形式は必ずこのJSON形式のみ、他のテキストは一切含めない：
 {"shin": "シンのセリフ（改行は\\nで）", "ken": "ケンのセリフ（改行は\\nで）"}`;
+
+// APIキー管理
+let API_KEY = localStorage.getItem('nambazu_api_key') || '';
+
+function startChat() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    alert('APIキーは sk-ant- から始まるやつや。確認してみてな。');
+    return;
+  }
+  API_KEY = key;
+  localStorage.setItem('nambazu_api_key', key);
+  document.getElementById('apiScreen').classList.add('hidden');
+}
+
+// 起動時にAPIキーが保存済みなら画面スキップ
+window.addEventListener('DOMContentLoaded', () => {
+  if (API_KEY && API_KEY.startsWith('sk-ant-')) {
+    document.getElementById('apiScreen').classList.add('hidden');
+  }
+});
 
 const chatArea = document.getElementById('chatArea');
 const inputField = document.getElementById('inputField');
@@ -510,7 +623,12 @@ async function sendMessage() {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
