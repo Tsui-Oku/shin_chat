@@ -1194,14 +1194,21 @@ const defaultReplies = [
   'ほんまか〜！\nそれはすごいな'
 ];
 
+let lastKey = null;
+
 function findReply(text){
   const matched = [];
   for(const k of Object.keys(responses)){
     const base = k.replace(/[0-9]+$/, '');
-    if(text.includes(base)) matched.push(responses[k]);
+    if(text.includes(base)) matched.push({key:k, lines:responses[k]});
   }
   if(matched.length === 0) return null;
-  return matched[Math.floor(Math.random() * matched.length)];
+  const filtered = matched.length > 1
+    ? matched.filter(m => m.key !== lastKey)
+    : matched;
+  const chosen = filtered[Math.floor(Math.random() * filtered.length)];
+  lastKey = chosen.key;
+  return chosen.lines;
 }
 const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
