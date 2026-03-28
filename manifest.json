@@ -1,0 +1,22 @@
+{
+  "name": "シン / ナンバズ",
+  "short_name": "シンチャット",
+  "description": "大阪出身の芸人コンビ「ナンバズ」のボケ担当シンとチャットできるで！",
+  "start_url": "/shin_chat/",
+  "display": "standalone",
+  "background_color": "#1a7a4a",
+  "theme_color": "#1a7a4a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "shin_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "shin_icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
