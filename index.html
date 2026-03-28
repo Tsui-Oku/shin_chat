@@ -265,7 +265,7 @@ const responses = {
   {who:'shin',text:'絵がきれいやなって思った'},
   {who:'ken',text:'感想それかい'},
 ],
-'アニメ':[
+'アニメ1':[
   {who:'shin',text:'アニメはな\nケンがチ。に感動しとったし\nデビルマンはトラウマやし\n虐殺器官はむずかしかったし\nいろいろ見てるで'},
   {who:'ken',text:'感想がバラバラすぎるな'},
   {who:'shin',text:'でもどれも印象に残っとる'},
@@ -277,7 +277,7 @@ const responses = {
   {who:'shin',text:'そうやねん\nだから余計思い出あんねん'},
   {who:'ken',text:'ないものの方が記憶に残るな'},
 ],
-'ゲーム':[
+'ゲーム1':[
   {who:'shin',text:'ゲームはな\nガキん頃ツレの家でプレステやったで\nFF15のニックスがかっこええし\nFF6はねえちゃんがロック好きやって言うてたし\nティナが初恋やねん'},
   {who:'ken',text:'話が飛びすぎや'},
   {who:'shin',text:'全部ゲームやん'},
@@ -320,14 +320,37 @@ const responses = {
   {who:'ken',text:'ゲームのキャラやぞ'},
   {who:'shin',text:'わかっとる\nでも本物やねん'},
 ],
-'マンガ':[
+'マンガ1':[
   {who:'shin',text:'マンガはな\nNARUTOのイルカ先生に憧れたし\nTRIGUNのウルフウッドがかっこええし\n村田雄介センセのアイシールド21も好きやで'},
   {who:'ken',text:'渋いとこついてくるな'},
   {who:'shin',text:'ねえちゃんから借りたやつが多いねん'},
   {who:'ken',text:'お姉さんのセンスやな'},
 ],
 
-
+'アート1':[
+  {who:'shin',text:'ねえちゃんがな\nゴヤの「我が子を食らうサトゥルヌス」の\n絵ハガキ机に飾っとんねん\nあれ毎回びびるわ\nなんで飾んねんって聞いたら\n「好きやから」って言うてた'},
+  {who:'ken',text:'お姉さんらしいな'},
+  {who:'shin',text:'鬼姉やからな'},
+  {who:'ken',text:'一致してるな'},
+],
+'アート2':[
+  {who:'shin',text:'ねえちゃんがな\nベックリンの「死の島」を\n居間に飾ろうとしてんけど\nおかんに止められとったわ\nおかんが「縁起悪い」って'},
+  {who:'ken',text:'お母さん正しいな'},
+  {who:'shin',text:'でもねえちゃんの部屋には\nこっそり飾っとるで'},
+  {who:'ken',text:'鬼姉やな'},
+],
+'アート3':[
+  {who:'shin',text:'ケンがな\n吉田博の木版画好きやって言うてたで\n山とか湖とかの風景画やけど\n静かでええねんって'},
+  {who:'ken',text:'なんで俺の話してんねん'},
+  {who:'shin',text:'ええやん\nケンらしいなって思てさ'},
+  {who:'ken',text:'ほっといてくれ'},
+],
+'アート4':[
+  {who:'shin',text:'ケンがな\nポール・ジャクレーの画集持っとんねん\nフランス人なのに日本の版画描いてた人やん\nケンに見せてもろたら\nほんまきれいやったわ'},
+  {who:'ken',text:'勝手に人の話するな'},
+  {who:'shin',text:'ええもん持っとるやん'},
+  {who:'ken',text:'それだけや'},
+],
 
 
 
@@ -397,7 +420,7 @@ const responses = {
   {who:'shin',text:'窪塚洋介さんのピンポンな\n男泣きしたわ\nペコとスマイルの話やのに\nケンのこと思い出してもうてん'},
   {who:'ken',text:'やめてくれ'},
 ],
-'映画':[
+'映画1':[
   {who:'shin',text:'映画な\nタイタニックで大号泣したし\nピンポンで男泣きしたし\nケンはワンダフルライフが好きやって言うてたで'},
   {who:'ken',text:'なんでオレの話してんねん'},
   {who:'shin',text:'ええやん別に'},
@@ -1143,12 +1166,12 @@ const defaultReplies = [
 function findReply(text){
   const matched = [];
   for(const k of Object.keys(responses)){
-    if(text.includes(k)) matched.push(responses[k]);
+    const base = k.replace(/[0-9]+$/, '');
+    if(text.includes(base)) matched.push(responses[k]);
   }
   if(matched.length === 0) return null;
   return matched[Math.floor(Math.random() * matched.length)];
 }
-
 const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
 
