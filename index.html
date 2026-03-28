@@ -1141,10 +1141,12 @@ const defaultReplies = [
 ];
 
 function findReply(text){
+  const matched = [];
   for(const k of Object.keys(responses)){
-    if(text.includes(k)) return responses[k];
+    if(text.includes(k)) matched.push(responses[k]);
   }
-  return null;
+  if(matched.length === 0) return null;
+  return matched[Math.floor(Math.random() * matched.length)];
 }
 
 const msgsEl = document.getElementById('msgs');
