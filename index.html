@@ -2,6 +2,14 @@
 <html lang="ja">
 <head>
 
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a7a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="シンチャット">
+<link rel="apple-touch-icon" href="shin_icon.png">
+
+
+  
 <meta property="og:title" content="シン / ナンバズ">
 <meta property="og:description" content="大阪出身の芸人コンビ「ナンバズ」のボケ担当シンとチャットできるで！">
 <meta property="og:image" content="https://tsui-oku.github.io/shin_chat/ogp.png">
@@ -1339,5 +1347,20 @@ setTimeout(()=>{
   addMsg('shin','来てくれてうれしいわ！<br>俺、ナンバズのシンや<br>なんでも話しかけてや〜', false);
 }, 700);
 </script>
+
+
+
+
+
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/shin_chat/sw.js');
+}
+</script>
+
+
+  
+
+  
 </body>
 </html>
