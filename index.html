@@ -1551,6 +1551,7 @@ const responses = {
 'oasis':[{who:'shin',text:'オレのおとんとおかんが\noasisのライブで出おうたんやで！'}],
   '家族1':[
     {who:'shin',text:'がきんちょの時おとんと\nイギリスのじいちゃんちに行ったわ！\nとーぜん何言っとるかわからんやったけど\n優しかったで\nケンにおみやげの飴ちゃんあげた'},
+    {who:'ken',text:'幼なじみのや！\nほんまは東京の国立大行くとこやってんけど\n俺が漫才に誘ってもうたんや！'},
   ],
   'ペット':[{who:'shin',text:'犬の名前はリアムのマネして\nタバコから来てんねん\nレッドとピースとマルボロや'}],
   '父':[{who:'shin',text:'イギリス系おとんはアイルランド人や！'}],
@@ -2215,17 +2216,17 @@ const defaultReplies = [
 
 let lastKey = null;
 
-functiolet lastKey = null;
+function normalizeText(s){
+  return s.replace(/\s|　/g,'').toLowerCase()
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+}
 
 function findReply(text){
-  const q = text.replace(/\s|　/g,'').toLowerCase()
-    .replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  const q = normalizeText(text);
   const matched = [];
   for(const k of Object.keys(responses)){
-    const base = k.replace(/[0-9]+$/, '').trim()
-      .replace(/\s|　/g,'').toLowerCase()
-      .replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
-    if(q.includes(base)) matched.push({key:k, lines:responses[k]});
+    const base = normalizeText(k.replace(/[0-9]+$/, '').trim());
+    if(base.length > 0 && q.includes(base)) matched.push({key:k, lines:responses[k]});
   }
   if(matched.length === 0) return null;
   const filtered = matched.length > 1
@@ -2235,6 +2236,7 @@ function findReply(text){
   lastKey = chosen.key;
   return chosen.lines;
 }
+const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
 
 function scrollBottom(){setTimeout(()=>{msgsEl.scrollTop=msgsEl.scrollHeight;},50);}
