@@ -21,12 +21,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>シン チャット</title>
 <style>
-
-  .bubble img{width:100%;border-radius:12px;margin-bottom:4px;display:block;}
-
-
-
-  
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:url('bg.png') center/cover fixed;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;}
 #app{width:390px;height:700px;background:#fff;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.15);}
@@ -1643,21 +1637,9 @@ const responses = {
 
 
 
-'舞台':[
-  {who:'shin',img:'img_chat01.png',text:'これがナンバズや！\nステージ最高やねん'},
-],
-'相方':[
-  {who:'shin',img:'img_chat01.png',text:'ケンや！小学校からの相棒や'},
-],
-'大阪':[
-  {who:'shin',img:'img_chat03.png',text:'千日前！ここが俺らのホームや'},
-  {who:'ken',text:'地元やな'},
-  {who:'shin',text:'最高やろ'},
-],
-'ペット':[
-  {who:'shin',img:'img_chat02.png',text:'犬まみれのケンや\nピースたちや！'},
-  {who:'shin',img:'img_chat04.png',text:'これガキん頃の俺とピースの初代や\nかわいいやろ'},
-],
+
+
+
 
 
   
@@ -1718,19 +1700,15 @@ function addMsg(who, text, showName){
   const row = document.createElement('div');
   row.className = 'msg-row '+(who==='user'?'right':'left');
   const t = getTime();
-
-  
   const escaped = text.replace(/\n/g,'<br>');
-　const imgHtml = msg && msg.img ? '<img src="'+msg.img+'">' : '';
-  
   if(who==='user'){
-        row.innerHTML = '<div class="bubble-wrap"><div class="bubble right">'+escaped+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
+    row.innerHTML = '<div class="bubble-wrap"><div class="bubble right">'+escaped+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
   } else {
     const src = who==='ken' ? KEN_SRC : SHIN_SRC;
     const nm = who==='ken' ? 'ケン' : 'シン';
     const cls = who==='ken' ? 'ken' : 'left';
     const nameHtml = showName ? '<div class="sender-name">'+nm+'</div>' : '';
-    row.innerHTML = makeAvImg(src)+'<div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+imgHtml+escaped+'</div><div class="ts">'+t+'</div></div>';
+    row.innerHTML = makeAvImg(src)+'<div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+escaped+'</div><div class="ts">'+t+'</div></div>';
   }
   msgsEl.appendChild(row);
   scrollBottom();
