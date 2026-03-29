@@ -1,4 +1,4 @@
-const CACHE = 'shin-chat-v9';
+const CACHE = 'shin-chat-v10';
 const FILES = [
   '/shin_chat/',
   '/shin_chat/index.html'
