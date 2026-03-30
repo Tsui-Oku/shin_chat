@@ -265,7 +265,7 @@ async function callClaudeAPI(userText){
     throw new Error(errData.error?.message||'API error:'+res.status);
   }
   const data=await res.json();
-  const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('');
+  const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('').replace(/\\n/g,'\n');
   conversationHistory.push({role:'assistant',content:assistantText});
   if(conversationHistory.length>40) conversationHistory.splice(0,conversationHistory.length-40);
   return assistantText;
