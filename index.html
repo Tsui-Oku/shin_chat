@@ -530,9 +530,47 @@ pendingImage=null;
   }
 }
 
+
+  async function handleSend(){
+  if(isSending) return;
+  const hasImage = !!pendingImage;
+  const val = inp.value.trim();
+  if(!val && !hasImage) return;
+  if(!getApiKey()){ showModal(); return; }
+
+  const imageToSend = pendingImage;
+  const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
+
+  inp.value = '';
+  pendingImage = null;
+  imgPreviewWrap.classList.remove('show');
+  imgPreview.src = '';
+
+  isSending=true; inp.disabled=true;
+  document.getElementById('send-btn').disabled=true;
+
+  addMsg('user', val, false, false, imgDataUrl);
+
+  try{
+    const rawReply=await callClaudeAPI(val, imageToSend);
+    const msgs=parseResponse(rawReply);
+    await sendMessages(msgs);
+  } catch(e){
+    if(e.message!=='INVALID_KEY'&&e.message!=='NO_KEY'){
+      removeTyping();
+      addMsg('shin','ちょっと待ってな〜\nもう一回送ってみてや',false);
+    }
+  } finally {
+    isSending=false; inp.disabled=false;
+    document.getElementById('send-btn').disabled=false;
+    inp.focus();
+  }
+}
+
 document.getElementById('send-btn').addEventListener('click',handleSend);
 inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
+  
 // ========== 起動 ==========
 let greetingShown=false;
 function startChat(){
