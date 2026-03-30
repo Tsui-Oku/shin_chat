@@ -17,14 +17,14 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:url('bg.png') center/cover fixed;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;}
-#app{width:390px;height:700px;background:#fff;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.15);}
-#topbar{background:#1a7a4a;padding:10px 14px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#app{width:390px;height:700px;background:#fff;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.15);position:relative;}
+#topbar{background:#1a7a4a;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 #topbar .av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.4);}
 #topbar .av img{width:100%;height:100%;object-fit:cover;}
 #topbar .info{flex:1;}
 #topbar .name{font-size:15px;font-weight:600;color:#fff;}
 #topbar .status{font-size:11px;color:rgba(255,255,255,0.8);}
-#topbar .icons{display:flex;gap:12px;align-items:center;color:rgba(255,255,255,0.9);font-size:19px;}
+#topbar .icons{display:flex;gap:12px;align-items:center;}
 #msgs{flex:1;overflow-y:auto;background:#b2d3e8;padding:12px 10px;display:flex;flex-direction:column;gap:6px;}
 #msgs::-webkit-scrollbar{width:4px;}
 #msgs::-webkit-scrollbar-track{background:transparent;}
@@ -58,21 +58,16 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 .dot:nth-child(2){animation-delay:0.22s;}
 .dot:nth-child(3){animation-delay:0.44s;}
 @keyframes bounce{0%,75%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
-#api-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
-#api-modal.hidden{display:none;}
-#api-box{background:#fff;border-radius:16px;padding:24px 20px;width:340px;max-width:90vw;display:flex;flex-direction:column;gap:14px;}
+#api-modal,#reset-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
+#api-modal.hidden,#reset-modal.hidden{display:none;}
+#api-box,#reset-box{background:#fff;border-radius:16px;padding:24px 20px;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:14px;}
 #api-box h2{font-size:15px;font-weight:700;color:#1a7a4a;text-align:center;}
-#api-box p{font-size:12px;color:#555;line-height:1.6;text-align:center;}
+#reset-box h2{font-size:15px;font-weight:700;color:#c0392b;text-align:center;}
+#api-box p,#reset-box p{font-size:12px;color:#555;line-height:1.6;text-align:center;}
 #api-key-inp{border:1px solid #ccc;border-radius:10px;padding:10px 12px;font-size:13px;width:100%;outline:none;font-family:inherit;}
 #api-key-inp:focus{border-color:#1a7a4a;}
 #api-save-btn{background:#1a7a4a;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
-#api-save-btn:active{opacity:0.85;}
 #api-error{font-size:12px;color:#c0392b;text-align:center;display:none;}
-#reset-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
-#reset-modal.hidden{display:none;}
-#reset-box{background:#fff;border-radius:16px;padding:24px 20px;width:300px;max-width:90vw;display:flex;flex-direction:column;gap:14px;text-align:center;}
-#reset-box h2{font-size:15px;font-weight:700;color:#c0392b;}
-#reset-box p{font-size:12px;color:#555;line-height:1.6;}
 .reset-btns{display:flex;gap:10px;}
 #reset-cancel{flex:1;background:#eee;color:#333;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
 #reset-confirm{flex:1;background:#c0392b;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
@@ -80,18 +75,15 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 #favor-bar{height:100%;background:#fff;border-radius:2px;transition:width 0.5s;}
 #favor-label{font-size:9px;color:rgba(255,255,255,0.7);margin-top:1px;}
 #menu-btn{background:none;border:none;cursor:pointer;font-size:18px;color:rgba(255,255,255,0.85);padding:0;line-height:1;}
-/* 画像プレビュー */
 #img-preview-wrap{background:#f0efe8;border-top:1px solid #d8d8d0;padding:6px 10px;display:none;align-items:center;gap:8px;flex-shrink:0;}
 #img-preview-wrap.show{display:flex;}
 #img-preview{width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid #ccc;}
 #img-preview-cancel{background:none;border:none;font-size:18px;cursor:pointer;color:#888;line-height:1;padding:0;}
 #img-preview-label{font-size:11px;color:#666;flex:1;}
-/* +ボタンメニュー */
 #plus-menu{position:absolute;bottom:70px;left:10px;background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:8px 0;display:none;z-index:100;}
 #plus-menu.show{display:block;}
 #plus-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;font-size:13px;cursor:pointer;color:#333;white-space:nowrap;}
 #plus-menu button:hover{background:#f5f5f5;}
-#app{position:relative;}
 </style>
 </head>
 <body>
@@ -117,7 +109,6 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
   </div>
 </div>
 
-<!-- 非表示ファイル入力 -->
 <input type="file" id="img-input" accept="image/*" style="display:none">
 
 <div id="app">
@@ -127,27 +118,22 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
       <div class="name">シン</div>
       <div class="status">ナンバズ ボケ担当</div>
       <div id="favor-bar-wrap"><div id="favor-bar" style="width:50%"></div></div>
-      <div id="favor-label">好感度 50</div>
+      <div id="favor-label">好感度 ふつう</div>
     </div>
     <div class="icons">
       <span>&#128222;</span>
-      <button id="menu-btn" title="メニュー">⋮</button>
+      <button id="menu-btn">⋮</button>
     </div>
   </div>
   <div id="msgs"><div class="date-sep">今日</div></div>
-
-  <!-- 画像プレビュー -->
   <div id="img-preview-wrap">
-    <img id="img-preview" src="" alt="プレビュー">
+    <img id="img-preview" src="" alt="">
     <div id="img-preview-label">この画像をシンに見せる</div>
     <button id="img-preview-cancel">✕</button>
   </div>
-
-  <!-- +メニュー -->
   <div id="plus-menu">
     <button id="plus-photo-btn">📷 写真・画像を送る</button>
   </div>
-
   <div id="bottom">
     <button class="side-btn" id="plus-btn">&#43;</button>
     <button class="side-btn">&#128247;</button>
@@ -166,7 +152,6 @@ const KEY_HIST  = 'shin_chat_history';
 const KEY_FAVOR = 'shin_chat_favor';
 const KEY_LOG   = 'shin_chat_msglog';
 
-// ========== 好感度 ==========
 let favor = parseInt(localStorage.getItem(KEY_FAVOR) || '50');
 function saveFavor(){ localStorage.setItem(KEY_FAVOR, favor); }
 function updateFavorUI(){
@@ -192,12 +177,10 @@ function changeFavor(delta){
   saveFavor(); updateFavorUI();
 }
 
-// ========== APIキー ==========
 function getApiKey(){ return localStorage.getItem(KEY_API)||''; }
 function saveApiKey(key){ localStorage.setItem(KEY_API, key.trim()); }
 function clearApiKey(){ localStorage.removeItem(KEY_API); }
 
-// ========== 会話履歴 ==========
 let conversationHistory = [];
 function saveHistory(){ localStorage.setItem(KEY_HIST, JSON.stringify(conversationHistory)); }
 function loadHistory(){
@@ -205,7 +188,6 @@ function loadHistory(){
   catch(e){ conversationHistory=[]; }
 }
 
-// ========== 表示ログ ==========
 let msgLog = [];
 function saveMsgLog(){ localStorage.setItem(KEY_LOG, JSON.stringify(msgLog.slice(-100))); }
 function loadMsgLog(){
@@ -213,7 +195,6 @@ function loadMsgLog(){
   catch(e){ msgLog=[]; }
 }
 
-// ========== システムプロンプト ==========
 function buildSystemPrompt(){
   return `あなたは大阪出身のお笑いコンビ「ナンバズ」のボケ担当「シン」です。本名はシェイン・フィンガル・マーレイ。父親がアイルランド人で、フィンガルはアイルランドの神様の名前。でも普段はシンで通してる。28歳。
 
@@ -275,12 +256,10 @@ ${getFavorContext()}
 画像を見せてもらったときはシンらしい反応で感想を言う。`;
 }
 
-// ========== モーダル ==========
 const modal = document.getElementById('api-modal');
 const apiKeyInp = document.getElementById('api-key-inp');
 const apiError = document.getElementById('api-error');
 const resetModal = document.getElementById('reset-modal');
-
 function showModal(){ modal.classList.remove('hidden'); apiKeyInp.value=''; apiError.style.display='none'; }
 function hideModal(){ modal.classList.add('hidden'); }
 
@@ -289,13 +268,8 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
   saveApiKey(key); hideModal(); startChat();
 });
-
-document.getElementById('menu-btn').addEventListener('click', ()=>{
-  resetModal.classList.remove('hidden');
-});
-document.getElementById('reset-cancel').addEventListener('click', ()=>{
-  resetModal.classList.add('hidden');
-});
+document.getElementById('menu-btn').addEventListener('click', ()=>{ resetModal.classList.remove('hidden'); });
+document.getElementById('reset-cancel').addEventListener('click', ()=>{ resetModal.classList.add('hidden'); });
 document.getElementById('reset-confirm').addEventListener('click', ()=>{
   clearApiKey();
   conversationHistory=[]; msgLog=[]; favor=50;
@@ -306,56 +280,41 @@ document.getElementById('reset-confirm').addEventListener('click', ()=>{
   showModal();
 });
 
-// ========== 画像機能 ==========
-let pendingImage = null; // {base64, mediaType, dataUrl}
-
+let pendingImage = null;
 const plusMenu = document.getElementById('plus-menu');
 const imgInput = document.getElementById('img-input');
 const imgPreviewWrap = document.getElementById('img-preview-wrap');
 const imgPreview = document.getElementById('img-preview');
 
-// +ボタンでメニュー開閉
 document.getElementById('plus-btn').addEventListener('click', (e)=>{
   e.stopPropagation();
   plusMenu.classList.toggle('show');
 });
-
-// メニュー外クリックで閉じる
 document.addEventListener('click', ()=>{ plusMenu.classList.remove('show'); });
-
-// 写真選択
 document.getElementById('plus-photo-btn').addEventListener('click', ()=>{
   plusMenu.classList.remove('show');
   imgInput.click();
 });
-
-// ファイル選択後
 imgInput.addEventListener('change', ()=>{
   const file = imgInput.files[0];
   if(!file) return;
   const reader = new FileReader();
   reader.onload = (e)=>{
     const dataUrl = e.target.result;
-    const base64 = dataUrl.split(',')[1];
-    const mediaType = file.type || 'image/jpeg';
-    pendingImage = {base64, mediaType, dataUrl};
+    pendingImage = {base64: dataUrl.split(',')[1], mediaType: file.type||'image/jpeg', dataUrl};
     imgPreview.src = dataUrl;
     imgPreviewWrap.classList.add('show');
   };
   reader.readAsDataURL(file);
   imgInput.value = '';
 });
-
-// プレビューキャンセル
 document.getElementById('img-preview-cancel').addEventListener('click', ()=>{
   pendingImage = null;
   imgPreviewWrap.classList.remove('show');
   imgPreview.src = '';
 });
 
-// ========== UI ==========
 function getTime(){ const n=new Date(); return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
-
 const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
 function scrollBottom(){ setTimeout(()=>{ msgsEl.scrollTop=msgsEl.scrollHeight; },50); }
@@ -366,10 +325,10 @@ function addMsg(who, text, showName, skipLog, imgDataUrl){
   const t=getTime();
   let content='';
   if(imgDataUrl){
-    content='<img class="chat-img" src="'+imgDataUrl+'" alt="送信画像">';
+    content='<img class="chat-img" src="'+imgDataUrl+'" alt="">';
     if(text) content+='<br>'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   } else {
-    content=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    content=(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
   if(who==='user'){
     row.innerHTML='<div class="bubble-wrap"><div class="bubble right">'+content+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
@@ -381,10 +340,7 @@ function addMsg(who, text, showName, skipLog, imgDataUrl){
     row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+content+'</div><div class="ts">'+t+'</div></div>';
   }
   msgsEl.appendChild(row); scrollBottom();
-  if(!skipLog){
-    msgLog.push({who, text:text||'', showName, t, imgDataUrl:imgDataUrl||null});
-    saveMsgLog();
-  }
+  if(!skipLog){ msgLog.push({who,text:text||'',showName,t,imgDataUrl:imgDataUrl||null}); saveMsgLog(); }
 }
 
 function showTyping(){
@@ -397,9 +353,7 @@ function removeTyping(){ const t=document.getElementById('typing'); if(t)t.remov
 
 function restoreMsgs(){
   loadMsgLog();
-  for(const m of msgLog){
-    addMsg(m.who, m.text, m.showName, true, m.imgDataUrl||null);
-  }
+  for(const m of msgLog) addMsg(m.who,m.text,m.showName,true,m.imgDataUrl||null);
 }
 
 function parseResponse(rawText){
@@ -429,24 +383,19 @@ async function sendMessages(msgs){
   }
 }
 
-// ========== API ==========
 async function callClaudeAPI(userText, imageData){
   const apiKey=getApiKey();
   if(!apiKey) throw new Error('NO_KEY');
-
-  // メッセージ内容を構築（画像あり/なし）
   let userContent;
   if(imageData){
-    userContent = [
-      {type:'image', source:{type:'base64', media_type:imageData.mediaType, data:imageData.base64}},
-      {type:'text', text: userText || 'この画像を見てどう思う？'}
+    userContent=[
+      {type:'image',source:{type:'base64',media_type:imageData.mediaType,data:imageData.base64}},
+      {type:'text',text:userText||'この画像を見てどう思う？'}
     ];
   } else {
-    userContent = userText;
+    userContent=userText;
   }
-
-  conversationHistory.push({role:'user', content:userContent});
-
+  conversationHistory.push({role:'user',content:userContent});
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{
@@ -462,97 +411,47 @@ async function callClaudeAPI(userText, imageData){
       messages:conversationHistory
     })
   });
-
   if(!res.ok){
     conversationHistory.pop();
     const errData=await res.json().catch(()=>({}));
     if(res.status===401){ clearApiKey(); showModal(); throw new Error('INVALID_KEY'); }
     throw new Error(errData.error?.message||'API error:'+res.status);
   }
-
   const data=await res.json();
   const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('').replace(/\\n/g,'\n');
   conversationHistory.push({role:'assistant',content:assistantText});
   if(conversationHistory.length>40) conversationHistory.splice(0,conversationHistory.length-40);
   saveHistory();
-
   const positive=['好き','ありがとう','おおきに','面白い','おもろい','すごい','かわいい','最高','うれしい','たのしい'];
   const negative=['つまらない','きらい','最悪','うざい','嫌い','むかつく'];
   const lower=(userText||'').toLowerCase();
   let delta=0;
   for(const w of positive){ if(lower.includes(w)) delta+=3; }
   for(const w of negative){ if(lower.includes(w)) delta-=5; }
-  if(imageData) delta+=2; // 画像送るだけで好感度ちょっと上がる
+  if(imageData) delta+=2;
   if(delta!==0) changeFavor(delta);
-
   return assistantText;
 }
 
-// ========== 送信 ==========
 let isSending=false;
 
-
-const hasImage = !!pendingImage;
-const val=inp.value.trim();
-if(!val && !hasImage) return;
-if(!getApiKey()){ showModal(); return; }
-
-const imageToSend = pendingImage;
-const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
-
-inp.value='';
-pendingImage=null;
-
-  
-  inp.value='';
-  pendingImage=null;
-  imgPreviewWrap.classList.remove('show');
-  imgPreview.src='';
-
-  isSending=true; inp.disabled=true;
-  document.getElementById('send-btn').disabled=true;
-
-  addMsg('user', val, false, false, imgDataUrl);
-
-  try{
-    const rawReply=await callClaudeAPI(val, imageToSend);
-    const msgs=parseResponse(rawReply);
-    await sendMessages(msgs);
-  } catch(e){
-    if(e.message!=='INVALID_KEY'&&e.message!=='NO_KEY'){
-      removeTyping();
-      addMsg('shin','ちょっと待ってな〜\nもう一回送ってみてや',false);
-    }
-  } finally {
-    isSending=false; inp.disabled=false;
-    document.getElementById('send-btn').disabled=false;
-    inp.focus();
-  }
-}
-
-
-  async function handleSend(){
+async function handleSend(){
   if(isSending) return;
   const hasImage = !!pendingImage;
   const val = inp.value.trim();
   if(!val && !hasImage) return;
   if(!getApiKey()){ showModal(); return; }
-
   const imageToSend = pendingImage;
   const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
-
-  inp.value = '';
-  pendingImage = null;
+  inp.value='';
+  pendingImage=null;
   imgPreviewWrap.classList.remove('show');
-  imgPreview.src = '';
-
+  imgPreview.src='';
   isSending=true; inp.disabled=true;
   document.getElementById('send-btn').disabled=true;
-
-  addMsg('user', val, false, false, imgDataUrl);
-
+  addMsg('user',val,false,false,imgDataUrl);
   try{
-    const rawReply=await callClaudeAPI(val, imageToSend);
+    const rawReply=await callClaudeAPI(val,imageToSend);
     const msgs=parseResponse(rawReply);
     await sendMessages(msgs);
   } catch(e){
@@ -570,8 +469,6 @@ pendingImage=null;
 document.getElementById('send-btn').addEventListener('click',handleSend);
 inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
-  
-// ========== 起動 ==========
 let greetingShown=false;
 function startChat(){
   if(greetingShown) return;
@@ -581,7 +478,6 @@ function startChat(){
 
 loadHistory();
 updateFavorUI();
-
 if(getApiKey()){
   restoreMsgs();
   if(msgLog.length===0) startChat();
