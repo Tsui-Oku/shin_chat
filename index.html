@@ -192,13 +192,12 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   saveApiKey(key); hideModal(); startChat();
 });
 
-
-function startChat(){
-  if(document.querySelector('.bubble.left')) return;
-  setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
-}
-
-  
+document.getElementById('reset-key-btn').addEventListener('click', ()=>{
+  clearApiKey();
+  conversationHistory.length=0;
+  document.getElementById('msgs').innerHTML='<div class="date-sep">今日</div>';
+  showModal();
+});
 
 function getTime(){ const n=new Date(); return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
 
@@ -295,7 +294,6 @@ async function handleSend(){
   if(isSending) return;
   const val=inp.value.trim();
   if(!val) return;
-
   inp.value=''; isSending=true; inp.disabled=true;
   document.getElementById('send-btn').disabled=true;
   addMsg('user',val,false);
@@ -318,11 +316,15 @@ async function handleSend(){
 document.getElementById('send-btn').addEventListener('click',handleSend);
 inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
+let greetingShown = false;
 function startChat(){
+  if(greetingShown) return;
+  greetingShown = true;
   setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
 }
 
 if(getApiKey()){ startChat(); } else { showModal(); }
+  
 </script>
 
 <script>
