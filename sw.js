@@ -1,2 +1,2 @@
-const CACHE = 'shin-chat-v19';
+const CACHE = 'shin-chat-v20';
 self.addEventListener('fetch', e => {});
