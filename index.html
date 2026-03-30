@@ -185,15 +185,20 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
  saveApiKey(key); hideModal();
 
-  
+
 document.getElementById('api-save-btn').addEventListener('click', ()=>{
   const key = apiKeyInp.value.trim();
   if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
-  saveApiKey(key); hideModal(); startChat(function startChat(){
+  saveApiKey(key); hideModal(); startChat();
+});
+
+
+function startChat(){
   if(document.querySelector('.bubble.left')) return;
   setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
-});
-});
+}
+
+  
 
 function getTime(){ const n=new Date(); return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
 
