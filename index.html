@@ -183,7 +183,8 @@ function hideModal(){ modal.classList.add('hidden'); }
 document.getElementById('api-save-btn').addEventListener('click', ()=>{
   const key = apiKeyInp.value.trim();
   if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
-  saveApiKey(key); hideModal(); startChat();
+ saveApiKey(key); hideModal();
+setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
 });
 
 document.getElementById('reset-key-btn').addEventListener('click', ()=>{
