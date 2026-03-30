@@ -295,7 +295,7 @@ async function handleSend(){
   if(isSending) return;
   const val=inp.value.trim();
   if(!val) return;
-if(getApiKey()){ startChat(); } else { showModal(); }
+
   inp.value=''; isSending=true; inp.disabled=true;
   document.getElementById('send-btn').disabled=true;
   addMsg('user',val,false);
