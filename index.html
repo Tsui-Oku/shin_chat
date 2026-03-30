@@ -41,6 +41,7 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 .bubble.left{background:#fff;color:#111;border-radius:16px;border-top-left-radius:4px;}
 .bubble.right{background:#4cd964;color:#111;border-radius:16px;border-top-right-radius:4px;}
 .bubble.ken{background:#fff;color:#111;border-radius:16px;border-top-left-radius:4px;}
+.bubble img.chat-img{max-width:100%;border-radius:10px;display:block;}
 .ts{font-size:10px;color:#5a7a8a;margin-top:3px;padding:0 3px;}
 #bottom{background:#f0efe8;border-top:1px solid #d8d8d0;padding:8px 10px;display:flex;align-items:center;gap:7px;flex-shrink:0;}
 .side-btn{width:32px;height:32px;border-radius:50%;background:transparent;border:none;font-size:20px;cursor:pointer;color:#666;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
@@ -67,7 +68,6 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 #api-save-btn{background:#1a7a4a;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
 #api-save-btn:active{opacity:0.85;}
 #api-error{font-size:12px;color:#c0392b;text-align:center;display:none;}
-/* リセット確認モーダル */
 #reset-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
 #reset-modal.hidden{display:none;}
 #reset-box{background:#fff;border-radius:16px;padding:24px 20px;width:300px;max-width:90vw;display:flex;flex-direction:column;gap:14px;text-align:center;}
@@ -76,12 +76,22 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 .reset-btns{display:flex;gap:10px;}
 #reset-cancel{flex:1;background:#eee;color:#333;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
 #reset-confirm{flex:1;background:#c0392b;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
-/* 好感度バー */
 #favor-bar-wrap{height:3px;background:rgba(255,255,255,0.2);border-radius:2px;margin-top:3px;}
 #favor-bar{height:100%;background:#fff;border-radius:2px;transition:width 0.5s;}
 #favor-label{font-size:9px;color:rgba(255,255,255,0.7);margin-top:1px;}
-/* 設定ボタン */
 #menu-btn{background:none;border:none;cursor:pointer;font-size:18px;color:rgba(255,255,255,0.85);padding:0;line-height:1;}
+/* 画像プレビュー */
+#img-preview-wrap{background:#f0efe8;border-top:1px solid #d8d8d0;padding:6px 10px;display:none;align-items:center;gap:8px;flex-shrink:0;}
+#img-preview-wrap.show{display:flex;}
+#img-preview{width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid #ccc;}
+#img-preview-cancel{background:none;border:none;font-size:18px;cursor:pointer;color:#888;line-height:1;padding:0;}
+#img-preview-label{font-size:11px;color:#666;flex:1;}
+/* +ボタンメニュー */
+#plus-menu{position:absolute;bottom:70px;left:10px;background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:8px 0;display:none;z-index:100;}
+#plus-menu.show{display:block;}
+#plus-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;font-size:13px;cursor:pointer;color:#333;white-space:nowrap;}
+#plus-menu button:hover{background:#f5f5f5;}
+#app{position:relative;}
 </style>
 </head>
 <body>
@@ -107,6 +117,9 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
   </div>
 </div>
 
+<!-- 非表示ファイル入力 -->
+<input type="file" id="img-input" accept="image/*" style="display:none">
+
 <div id="app">
   <div id="topbar">
     <div class="av"><img id="topbar-av" src="shin_icon.png" alt="シン"></div>
@@ -122,8 +135,21 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
     </div>
   </div>
   <div id="msgs"><div class="date-sep">今日</div></div>
+
+  <!-- 画像プレビュー -->
+  <div id="img-preview-wrap">
+    <img id="img-preview" src="" alt="プレビュー">
+    <div id="img-preview-label">この画像をシンに見せる</div>
+    <button id="img-preview-cancel">✕</button>
+  </div>
+
+  <!-- +メニュー -->
+  <div id="plus-menu">
+    <button id="plus-photo-btn">📷 写真・画像を送る</button>
+  </div>
+
   <div id="bottom">
-    <button class="side-btn">&#43;</button>
+    <button class="side-btn" id="plus-btn">&#43;</button>
     <button class="side-btn">&#128247;</button>
     <input id="inp" type="text" placeholder="メッセージを入力...">
     <button id="send-btn"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
@@ -135,22 +161,18 @@ const SHIN_SRC = "shin_icon.png";
 const KEN_SRC  = "ken_icon.png";
 document.getElementById('topbar-av').src = SHIN_SRC;
 
-// ========== ストレージキー ==========
-const KEY_API    = 'shin_chat_api_key';
-const KEY_HIST   = 'shin_chat_history';
-const KEY_FAVOR  = 'shin_chat_favor';
-const KEY_LOG    = 'shin_chat_msglog';
+const KEY_API   = 'shin_chat_api_key';
+const KEY_HIST  = 'shin_chat_history';
+const KEY_FAVOR = 'shin_chat_favor';
+const KEY_LOG   = 'shin_chat_msglog';
 
 // ========== 好感度 ==========
 let favor = parseInt(localStorage.getItem(KEY_FAVOR) || '50');
-
 function saveFavor(){ localStorage.setItem(KEY_FAVOR, favor); }
-
 function updateFavorUI(){
   document.getElementById('favor-bar').style.width = favor + '%';
   document.getElementById('favor-label').textContent = getFavorLabel();
 }
-
 function getFavorLabel(){
   if(favor >= 90) return '好感度 MAX ♥';
   if(favor >= 70) return '好感度 高め ▲';
@@ -158,7 +180,6 @@ function getFavorLabel(){
   if(favor >= 20) return '好感度 低め ▽';
   return '好感度 最低...';
 }
-
 function getFavorContext(){
   if(favor >= 90) return '相手のことをめちゃくちゃ好きで、テンションが高く甘えた感じで話す。「なんでも言うてや〜」みたいな積極的な態度。';
   if(favor >= 70) return '相手に好意を持っていて、気さくに楽しく話す。普通のシンのテンション。';
@@ -166,11 +187,9 @@ function getFavorContext(){
   if(favor >= 20) return '少し塩対応気味。返答が短めで素っ気ない。';
   return 'かなり冷たい対応。最低限の返事しかしない。「……」で始める返答も可。';
 }
-
 function changeFavor(delta){
   favor = Math.max(0, Math.min(100, favor + delta));
-  saveFavor();
-  updateFavorUI();
+  saveFavor(); updateFavorUI();
 }
 
 // ========== APIキー ==========
@@ -178,32 +197,20 @@ function getApiKey(){ return localStorage.getItem(KEY_API)||''; }
 function saveApiKey(key){ localStorage.setItem(KEY_API, key.trim()); }
 function clearApiKey(){ localStorage.removeItem(KEY_API); }
 
-// ========== 会話履歴（API用） ==========
+// ========== 会話履歴 ==========
 let conversationHistory = [];
-
-function saveHistory(){
-  localStorage.setItem(KEY_HIST, JSON.stringify(conversationHistory));
-}
-
+function saveHistory(){ localStorage.setItem(KEY_HIST, JSON.stringify(conversationHistory)); }
 function loadHistory(){
-  try{
-    const saved = localStorage.getItem(KEY_HIST);
-    if(saved) conversationHistory = JSON.parse(saved);
-  } catch(e){ conversationHistory = []; }
+  try{ const s=localStorage.getItem(KEY_HIST); if(s) conversationHistory=JSON.parse(s); }
+  catch(e){ conversationHistory=[]; }
 }
 
-// ========== 表示ログ（画面再現用） ==========
+// ========== 表示ログ ==========
 let msgLog = [];
-
-function saveMsgLog(){
-  localStorage.setItem(KEY_LOG, JSON.stringify(msgLog.slice(-100)));
-}
-
+function saveMsgLog(){ localStorage.setItem(KEY_LOG, JSON.stringify(msgLog.slice(-100))); }
 function loadMsgLog(){
-  try{
-    const saved = localStorage.getItem(KEY_LOG);
-    if(saved) msgLog = JSON.parse(saved);
-  } catch(e){ msgLog = []; }
+  try{ const s=localStorage.getItem(KEY_LOG); if(s) msgLog=JSON.parse(s); }
+  catch(e){ msgLog=[]; }
 }
 
 // ========== システムプロンプト ==========
@@ -264,7 +271,8 @@ ${getFavorContext()}
 1〜3文の短い返答が基本。改行は\\nで表現。
 絵文字・HTMLタグは使わない。
 「AIです」とは絶対に言わない。キャラを崩さない。
-不適切な内容には「それはちょっと無理やわ〜」と返す。`;
+不適切な内容には「それはちょっと無理やわ〜」と返す。
+画像を見せてもらったときはシンらしい反応で感想を言う。`;
 }
 
 // ========== モーダル ==========
@@ -282,7 +290,6 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   saveApiKey(key); hideModal(); startChat();
 });
 
-// メニューボタン→リセット確認モーダル
 document.getElementById('menu-btn').addEventListener('click', ()=>{
   resetModal.classList.remove('hidden');
 });
@@ -291,14 +298,59 @@ document.getElementById('reset-cancel').addEventListener('click', ()=>{
 });
 document.getElementById('reset-confirm').addEventListener('click', ()=>{
   clearApiKey();
-  conversationHistory = [];
-  msgLog = [];
-  favor = 50;
+  conversationHistory=[]; msgLog=[]; favor=50;
   saveHistory(); saveMsgLog(); saveFavor(); updateFavorUI();
-  document.getElementById('msgs').innerHTML = '<div class="date-sep">今日</div>';
+  document.getElementById('msgs').innerHTML='<div class="date-sep">今日</div>';
   resetModal.classList.add('hidden');
-  greetingShown = false;
+  greetingShown=false;
   showModal();
+});
+
+// ========== 画像機能 ==========
+let pendingImage = null; // {base64, mediaType, dataUrl}
+
+const plusMenu = document.getElementById('plus-menu');
+const imgInput = document.getElementById('img-input');
+const imgPreviewWrap = document.getElementById('img-preview-wrap');
+const imgPreview = document.getElementById('img-preview');
+
+// +ボタンでメニュー開閉
+document.getElementById('plus-btn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  plusMenu.classList.toggle('show');
+});
+
+// メニュー外クリックで閉じる
+document.addEventListener('click', ()=>{ plusMenu.classList.remove('show'); });
+
+// 写真選択
+document.getElementById('plus-photo-btn').addEventListener('click', ()=>{
+  plusMenu.classList.remove('show');
+  imgInput.click();
+});
+
+// ファイル選択後
+imgInput.addEventListener('change', ()=>{
+  const file = imgInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const dataUrl = e.target.result;
+    const base64 = dataUrl.split(',')[1];
+    const mediaType = file.type || 'image/jpeg';
+    pendingImage = {base64, mediaType, dataUrl};
+    imgPreview.src = dataUrl;
+    imgPreviewWrap.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+  imgInput.value = '';
+});
+
+// プレビューキャンセル
+document.getElementById('img-preview-cancel').addEventListener('click', ()=>{
+  pendingImage = null;
+  imgPreviewWrap.classList.remove('show');
+  imgPreview.src = '';
 });
 
 // ========== UI ==========
@@ -308,23 +360,29 @@ const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
 function scrollBottom(){ setTimeout(()=>{ msgsEl.scrollTop=msgsEl.scrollHeight; },50); }
 
-function addMsg(who, text, showName, skipLog){
+function addMsg(who, text, showName, skipLog, imgDataUrl){
   const row=document.createElement('div');
   row.className='msg-row '+(who==='user'?'right':'left');
   const t=getTime();
-  const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  let content='';
+  if(imgDataUrl){
+    content='<img class="chat-img" src="'+imgDataUrl+'" alt="送信画像">';
+    if(text) content+='<br>'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  } else {
+    content=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
   if(who==='user'){
-    row.innerHTML='<div class="bubble-wrap"><div class="bubble right">'+safe+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
+    row.innerHTML='<div class="bubble-wrap"><div class="bubble right">'+content+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
   } else {
     const src=who==='ken'?KEN_SRC:SHIN_SRC;
     const nm=who==='ken'?'ケン':'シン';
     const cls=who==='ken'?'ken':'left';
     const nameHtml=showName?'<div class="sender-name">'+nm+'</div>':'';
-    row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+safe+'</div><div class="ts">'+t+'</div></div>';
+    row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+content+'</div><div class="ts">'+t+'</div></div>';
   }
   msgsEl.appendChild(row); scrollBottom();
   if(!skipLog){
-    msgLog.push({who, text, showName, t});
+    msgLog.push({who, text:text||'', showName, t, imgDataUrl:imgDataUrl||null});
     saveMsgLog();
   }
 }
@@ -337,11 +395,10 @@ function showTyping(){
 }
 function removeTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
 
-// 保存済みメッセージを画面に復元
 function restoreMsgs(){
   loadMsgLog();
   for(const m of msgLog){
-    addMsg(m.who, m.text, m.showName, true);
+    addMsg(m.who, m.text, m.showName, true, m.imgDataUrl||null);
   }
 }
 
@@ -373,10 +430,23 @@ async function sendMessages(msgs){
 }
 
 // ========== API ==========
-async function callClaudeAPI(userText){
+async function callClaudeAPI(userText, imageData){
   const apiKey=getApiKey();
   if(!apiKey) throw new Error('NO_KEY');
-  conversationHistory.push({role:'user',content:userText});
+
+  // メッセージ内容を構築（画像あり/なし）
+  let userContent;
+  if(imageData){
+    userContent = [
+      {type:'image', source:{type:'base64', media_type:imageData.mediaType, data:imageData.base64}},
+      {type:'text', text: userText || 'この画像を見てどう思う？'}
+    ];
+  } else {
+    userContent = userText;
+  }
+
+  conversationHistory.push({role:'user', content:userContent});
+
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{
@@ -392,26 +462,28 @@ async function callClaudeAPI(userText){
       messages:conversationHistory
     })
   });
+
   if(!res.ok){
     conversationHistory.pop();
     const errData=await res.json().catch(()=>({}));
     if(res.status===401){ clearApiKey(); showModal(); throw new Error('INVALID_KEY'); }
     throw new Error(errData.error?.message||'API error:'+res.status);
   }
+
   const data=await res.json();
   const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('').replace(/\\n/g,'\n');
   conversationHistory.push({role:'assistant',content:assistantText});
   if(conversationHistory.length>40) conversationHistory.splice(0,conversationHistory.length-40);
   saveHistory();
 
-  // 好感度変動（ポジティブワードで+、ネガティブで-）
-  const positive=['好き','ありがとう','おおきに','面白い','おもろい','すごい','かわいい','最高','好感度','うれしい','たのしい'];
+  const positive=['好き','ありがとう','おおきに','面白い','おもろい','すごい','かわいい','最高','うれしい','たのしい'];
   const negative=['つまらない','きらい','最悪','うざい','嫌い','むかつく'];
-  const lower = userText.toLowerCase();
-  let delta = 0;
-  for(const w of positive){ if(lower.includes(w)) delta += 3; }
-  for(const w of negative){ if(lower.includes(w)) delta -= 5; }
-  if(delta !== 0) changeFavor(delta);
+  const lower=(userText||'').toLowerCase();
+  let delta=0;
+  for(const w of positive){ if(lower.includes(w)) delta+=3; }
+  for(const w of negative){ if(lower.includes(w)) delta-=5; }
+  if(imageData) delta+=2; // 画像送るだけで好感度ちょっと上がる
+  if(delta!==0) changeFavor(delta);
 
   return assistantText;
 }
@@ -422,13 +494,25 @@ let isSending=false;
 async function handleSend(){
   if(isSending) return;
   const val=inp.value.trim();
-  if(!val) return;
+  const hasImage = !!pendingImage;
+  if(!val && !hasImage) return;
   if(!getApiKey()){ showModal(); return; }
-  inp.value=''; isSending=true; inp.disabled=true;
+
+  const imageToSend = pendingImage;
+  const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
+
+  inp.value='';
+  pendingImage=null;
+  imgPreviewWrap.classList.remove('show');
+  imgPreview.src='';
+
+  isSending=true; inp.disabled=true;
   document.getElementById('send-btn').disabled=true;
-  addMsg('user',val,false);
+
+  addMsg('user', val, false, false, imgDataUrl);
+
   try{
-    const rawReply=await callClaudeAPI(val);
+    const rawReply=await callClaudeAPI(val, imageToSend);
     const msgs=parseResponse(rawReply);
     await sendMessages(msgs);
   } catch(e){
@@ -447,21 +531,20 @@ document.getElementById('send-btn').addEventListener('click',handleSend);
 inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
 // ========== 起動 ==========
-let greetingShown = false;
+let greetingShown=false;
 function startChat(){
   if(greetingShown) return;
-  greetingShown = true;
+  greetingShown=true;
   setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
 }
 
-// 初期化
 loadHistory();
 updateFavorUI();
 
 if(getApiKey()){
   restoreMsgs();
-  if(msgLog.length === 0) startChat();
-  else greetingShown = true;
+  if(msgLog.length===0) startChat();
+  else greetingShown=true;
 } else {
   showModal();
 }
