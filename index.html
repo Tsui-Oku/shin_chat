@@ -491,16 +491,19 @@ async function callClaudeAPI(userText, imageData){
 // ========== 送信 ==========
 let isSending=false;
 
-async function handleSend(){
- if(!val && !hasImage) return;
-  const val=inp.value.trim();
-  const hasImage = !!pendingImage;
-  if(!val && !hasImage) return;
-  if(!getApiKey()){ showModal(); return; }
 
-  const imageToSend = pendingImage;
-  const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
+const hasImage = !!pendingImage;
+const val=inp.value.trim();
+if(!val && !hasImage) return;
+if(!getApiKey()){ showModal(); return; }
 
+const imageToSend = pendingImage;
+const imgDataUrl = imageToSend ? imageToSend.dataUrl : null;
+
+inp.value='';
+pendingImage=null;
+
+  
   inp.value='';
   pendingImage=null;
   imgPreviewWrap.classList.remove('show');
