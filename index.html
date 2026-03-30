@@ -492,7 +492,7 @@ async function callClaudeAPI(userText, imageData){
 let isSending=false;
 
 async function handleSend(){
-  if(isSending) return;
+ if(!val && !hasImage) return;
   const val=inp.value.trim();
   const hasImage = !!pendingImage;
   if(!val && !hasImage) return;
