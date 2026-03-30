@@ -272,7 +272,7 @@ async function callClaudeAPI(userText){
     },
     body:JSON.stringify({
       model:'claude-sonnet-4-5',
-      max_tokens:350,
+      max_tokens:150,
       system:SYSTEM_PROMPT,
       messages:conversationHistory
     })
