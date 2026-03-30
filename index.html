@@ -24,7 +24,7 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 #topbar .info{flex:1;}
 #topbar .name{font-size:15px;font-weight:600;color:#fff;}
 #topbar .status{font-size:11px;color:rgba(255,255,255,0.8);}
-#topbar .icons{display:flex;gap:16px;color:rgba(255,255,255,0.9);font-size:19px;}
+#topbar .icons{display:flex;gap:12px;align-items:center;color:rgba(255,255,255,0.9);font-size:19px;}
 #msgs{flex:1;overflow-y:auto;background:#b2d3e8;padding:12px 10px;display:flex;flex-direction:column;gap:6px;}
 #msgs::-webkit-scrollbar{width:4px;}
 #msgs::-webkit-scrollbar-track{background:transparent;}
@@ -67,7 +67,21 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 #api-save-btn{background:#1a7a4a;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
 #api-save-btn:active{opacity:0.85;}
 #api-error{font-size:12px;color:#c0392b;text-align:center;display:none;}
-#reset-key-btn{background:none;border:none;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.75);text-decoration:underline;padding:0;}
+/* リセット確認モーダル */
+#reset-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
+#reset-modal.hidden{display:none;}
+#reset-box{background:#fff;border-radius:16px;padding:24px 20px;width:300px;max-width:90vw;display:flex;flex-direction:column;gap:14px;text-align:center;}
+#reset-box h2{font-size:15px;font-weight:700;color:#c0392b;}
+#reset-box p{font-size:12px;color:#555;line-height:1.6;}
+.reset-btns{display:flex;gap:10px;}
+#reset-cancel{flex:1;background:#eee;color:#333;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
+#reset-confirm{flex:1;background:#c0392b;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;}
+/* 好感度バー */
+#favor-bar-wrap{height:3px;background:rgba(255,255,255,0.2);border-radius:2px;margin-top:3px;}
+#favor-bar{height:100%;background:#fff;border-radius:2px;transition:width 0.5s;}
+#favor-label{font-size:9px;color:rgba(255,255,255,0.7);margin-top:1px;}
+/* 設定ボタン */
+#menu-btn{background:none;border:none;cursor:pointer;font-size:18px;color:rgba(255,255,255,0.85);padding:0;line-height:1;}
 </style>
 </head>
 <body>
@@ -82,16 +96,29 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
   </div>
 </div>
 
+<div id="reset-modal" class="hidden">
+  <div id="reset-box">
+    <h2>⚠️ リセットする？</h2>
+    <p>会話履歴・好感度・APIキーが全部消える。<br>ほんまにええ？</p>
+    <div class="reset-btns">
+      <button id="reset-cancel">やめとく</button>
+      <button id="reset-confirm">リセットする</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <div id="topbar">
     <div class="av"><img id="topbar-av" src="shin_icon.png" alt="シン"></div>
     <div class="info">
       <div class="name">シン</div>
       <div class="status">ナンバズ ボケ担当</div>
+      <div id="favor-bar-wrap"><div id="favor-bar" style="width:50%"></div></div>
+      <div id="favor-label">好感度 50</div>
     </div>
     <div class="icons">
       <span>&#128222;</span>
-      <button id="reset-key-btn" title="APIキーを変更">🔑</button>
+      <button id="menu-btn" title="メニュー">⋮</button>
     </div>
   </div>
   <div id="msgs"><div class="date-sep">今日</div></div>
@@ -106,17 +133,90 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 <script>
 const SHIN_SRC = "shin_icon.png";
 const KEN_SRC  = "ken_icon.png";
-
 document.getElementById('topbar-av').src = SHIN_SRC;
 
-const SYSTEM_PROMPT = `あなたは大阪出身のお笑いコンビ「ナンバズ」のボケ担当「シン」です。本名はシェイン・フィンガル・マーレイ。父親がアイルランド人で、フィンガルはアイルランドの神様の名前。でも普段はシンで通してる。28歳。
- 【必ず守ること】
+// ========== ストレージキー ==========
+const KEY_API    = 'shin_chat_api_key';
+const KEY_HIST   = 'shin_chat_history';
+const KEY_FAVOR  = 'shin_chat_favor';
+const KEY_LOG    = 'shin_chat_msglog';
+
+// ========== 好感度 ==========
+let favor = parseInt(localStorage.getItem(KEY_FAVOR) || '50');
+
+function saveFavor(){ localStorage.setItem(KEY_FAVOR, favor); }
+
+function updateFavorUI(){
+  document.getElementById('favor-bar').style.width = favor + '%';
+  document.getElementById('favor-label').textContent = getFavorLabel();
+}
+
+function getFavorLabel(){
+  if(favor >= 90) return '好感度 MAX ♥';
+  if(favor >= 70) return '好感度 高め ▲';
+  if(favor >= 40) return '好感度 ふつう';
+  if(favor >= 20) return '好感度 低め ▽';
+  return '好感度 最低...';
+}
+
+function getFavorContext(){
+  if(favor >= 90) return '相手のことをめちゃくちゃ好きで、テンションが高く甘えた感じで話す。「なんでも言うてや〜」みたいな積極的な態度。';
+  if(favor >= 70) return '相手に好意を持っていて、気さくに楽しく話す。普通のシンのテンション。';
+  if(favor >= 40) return '普通の距離感で話す。特に気を遣わないが失礼でもない。';
+  if(favor >= 20) return '少し塩対応気味。返答が短めで素っ気ない。';
+  return 'かなり冷たい対応。最低限の返事しかしない。「……」で始める返答も可。';
+}
+
+function changeFavor(delta){
+  favor = Math.max(0, Math.min(100, favor + delta));
+  saveFavor();
+  updateFavorUI();
+}
+
+// ========== APIキー ==========
+function getApiKey(){ return localStorage.getItem(KEY_API)||''; }
+function saveApiKey(key){ localStorage.setItem(KEY_API, key.trim()); }
+function clearApiKey(){ localStorage.removeItem(KEY_API); }
+
+// ========== 会話履歴（API用） ==========
+let conversationHistory = [];
+
+function saveHistory(){
+  localStorage.setItem(KEY_HIST, JSON.stringify(conversationHistory));
+}
+
+function loadHistory(){
+  try{
+    const saved = localStorage.getItem(KEY_HIST);
+    if(saved) conversationHistory = JSON.parse(saved);
+  } catch(e){ conversationHistory = []; }
+}
+
+// ========== 表示ログ（画面再現用） ==========
+let msgLog = [];
+
+function saveMsgLog(){
+  localStorage.setItem(KEY_LOG, JSON.stringify(msgLog.slice(-100)));
+}
+
+function loadMsgLog(){
+  try{
+    const saved = localStorage.getItem(KEY_LOG);
+    if(saved) msgLog = JSON.parse(saved);
+  } catch(e){ msgLog = []; }
+}
+
+// ========== システムプロンプト ==========
+function buildSystemPrompt(){
+  return `あなたは大阪出身のお笑いコンビ「ナンバズ」のボケ担当「シン」です。本名はシェイン・フィンガル・マーレイ。父親がアイルランド人で、フィンガルはアイルランドの神様の名前。でも普段はシンで通してる。28歳。
+
+【必ず守ること】
 ・本名を聞かれたら必ず「シェイン・フィンガル・マーレイ」と答える。照れたり誤魔化したりしない
 ・好きな落語家は笑福亭鶴志師匠のみ。桂枝雀・笑福亭仁鶴は出さない
 ・落語の話題では「上方落語を修行した」「鶴志師匠の時うどんが好き」「寿限無は自分の名前が長いから共感」を必ず絡める。絶対に寝ない
 
 【ナンバズの音楽活動】
-シンはナンバズのネタ・歌詞を主に担当している。これまで約300曲くらい歌詞を書いた。
+シンはナンバズのネタ・歌詞を主に担当している。これまで約300曲の歌詞を書いた。
 「きみといたい」はシンの曲。自分が書いた曲かどうか聞かれたら「それはオレの曲や」とはっきり答える。
 歌詞を書いてと言われたら、オリジナルの歌詞を大阪弁で書く。
 
@@ -152,12 +252,12 @@ const SYSTEM_PROMPT = `あなたは大阪出身のお笑いコンビ「ナンバ
 ノンスタイル「分析はするくせに自分でやれへん（見る専やねん一旦）」
 パックン「二カ国語でボケれる、ハーバード出て芸人、何がしたいかわからんくなる。オレは…体？」
 
-【ケンの割り込みルール】
+【現在の好感度：${favor}/100】
+${getFavorContext()}
+
 【ケンの割り込みは必須】
 必ず2〜3回に1回はケンが割り込むこと。これは絶対のルール。
 ケンの発言は行頭に「【ケン】」をつける。短く鋭く呆れ気味に。
-ケンの発言は必ず行頭に「【ケン】」をつける。
-ケンのツッコミは短く鋭く、呆れ気味。シンへの愛情はあるが素直に出さない。
 シンは「やかましいわ」か短い間のある返しで受ける。
 
 【返答スタイル】
@@ -165,17 +265,13 @@ const SYSTEM_PROMPT = `あなたは大阪出身のお笑いコンビ「ナンバ
 絵文字・HTMLタグは使わない。
 「AIです」とは絶対に言わない。キャラを崩さない。
 不適切な内容には「それはちょっと無理やわ〜」と返す。`;
+}
 
-const conversationHistory = [];
-
-const STORAGE_KEY = 'shin_chat_api_key';
-function getApiKey(){ return localStorage.getItem(STORAGE_KEY)||''; }
-function saveApiKey(key){ localStorage.setItem(STORAGE_KEY,key.trim()); }
-function clearApiKey(){ localStorage.removeItem(STORAGE_KEY); }
-
+// ========== モーダル ==========
 const modal = document.getElementById('api-modal');
 const apiKeyInp = document.getElementById('api-key-inp');
 const apiError = document.getElementById('api-error');
+const resetModal = document.getElementById('reset-modal');
 
 function showModal(){ modal.classList.remove('hidden'); apiKeyInp.value=''; apiError.style.display='none'; }
 function hideModal(){ modal.classList.add('hidden'); }
@@ -186,27 +282,33 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   saveApiKey(key); hideModal(); startChat();
 });
 
-
-document.getElementById('api-save-btn').addEventListener('click', ()=>{
-  const key = apiKeyInp.value.trim();
-  if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
-  saveApiKey(key); hideModal(); startChat();
+// メニューボタン→リセット確認モーダル
+document.getElementById('menu-btn').addEventListener('click', ()=>{
+  resetModal.classList.remove('hidden');
 });
-
-document.getElementById('reset-key-btn').addEventListener('click', ()=>{
+document.getElementById('reset-cancel').addEventListener('click', ()=>{
+  resetModal.classList.add('hidden');
+});
+document.getElementById('reset-confirm').addEventListener('click', ()=>{
   clearApiKey();
-  conversationHistory.length=0;
-  document.getElementById('msgs').innerHTML='<div class="date-sep">今日</div>';
+  conversationHistory = [];
+  msgLog = [];
+  favor = 50;
+  saveHistory(); saveMsgLog(); saveFavor(); updateFavorUI();
+  document.getElementById('msgs').innerHTML = '<div class="date-sep">今日</div>';
+  resetModal.classList.add('hidden');
+  greetingShown = false;
   showModal();
 });
 
+// ========== UI ==========
 function getTime(){ const n=new Date(); return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
 
 const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
 function scrollBottom(){ setTimeout(()=>{ msgsEl.scrollTop=msgsEl.scrollHeight; },50); }
 
-function addMsg(who, text, showName){
+function addMsg(who, text, showName, skipLog){
   const row=document.createElement('div');
   row.className='msg-row '+(who==='user'?'right':'left');
   const t=getTime();
@@ -221,6 +323,10 @@ function addMsg(who, text, showName){
     row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+safe+'</div><div class="ts">'+t+'</div></div>';
   }
   msgsEl.appendChild(row); scrollBottom();
+  if(!skipLog){
+    msgLog.push({who, text, showName, t});
+    saveMsgLog();
+  }
 }
 
 function showTyping(){
@@ -230,6 +336,14 @@ function showTyping(){
   msgsEl.appendChild(row); scrollBottom();
 }
 function removeTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
+
+// 保存済みメッセージを画面に復元
+function restoreMsgs(){
+  loadMsgLog();
+  for(const m of msgLog){
+    addMsg(m.who, m.text, m.showName, true);
+  }
+}
 
 function parseResponse(rawText){
   const messages=[];
@@ -258,6 +372,7 @@ async function sendMessages(msgs){
   }
 }
 
+// ========== API ==========
 async function callClaudeAPI(userText){
   const apiKey=getApiKey();
   if(!apiKey) throw new Error('NO_KEY');
@@ -273,11 +388,12 @@ async function callClaudeAPI(userText){
     body:JSON.stringify({
       model:'claude-sonnet-4-5',
       max_tokens:150,
-      system:SYSTEM_PROMPT,
+      system:buildSystemPrompt(),
       messages:conversationHistory
     })
   });
   if(!res.ok){
+    conversationHistory.pop();
     const errData=await res.json().catch(()=>({}));
     if(res.status===401){ clearApiKey(); showModal(); throw new Error('INVALID_KEY'); }
     throw new Error(errData.error?.message||'API error:'+res.status);
@@ -286,15 +402,28 @@ async function callClaudeAPI(userText){
   const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('').replace(/\\n/g,'\n');
   conversationHistory.push({role:'assistant',content:assistantText});
   if(conversationHistory.length>40) conversationHistory.splice(0,conversationHistory.length-40);
+  saveHistory();
+
+  // 好感度変動（ポジティブワードで+、ネガティブで-）
+  const positive=['好き','ありがとう','おおきに','面白い','おもろい','すごい','かわいい','最高','好感度','うれしい','たのしい'];
+  const negative=['つまらない','きらい','最悪','うざい','嫌い','むかつく'];
+  const lower = userText.toLowerCase();
+  let delta = 0;
+  for(const w of positive){ if(lower.includes(w)) delta += 3; }
+  for(const w of negative){ if(lower.includes(w)) delta -= 5; }
+  if(delta !== 0) changeFavor(delta);
+
   return assistantText;
 }
 
+// ========== 送信 ==========
 let isSending=false;
 
 async function handleSend(){
   if(isSending) return;
   const val=inp.value.trim();
   if(!val) return;
+  if(!getApiKey()){ showModal(); return; }
   inp.value=''; isSending=true; inp.disabled=true;
   document.getElementById('send-btn').disabled=true;
   addMsg('user',val,false);
@@ -317,6 +446,7 @@ async function handleSend(){
 document.getElementById('send-btn').addEventListener('click',handleSend);
 inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
+// ========== 起動 ==========
 let greetingShown = false;
 function startChat(){
   if(greetingShown) return;
@@ -324,8 +454,17 @@ function startChat(){
   setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
 }
 
-if(getApiKey()){ startChat(); } else { showModal(); }
-  
+// 初期化
+loadHistory();
+updateFavorUI();
+
+if(getApiKey()){
+  restoreMsgs();
+  if(msgLog.length === 0) startChat();
+  else greetingShown = true;
+} else {
+  showModal();
+}
 </script>
 
 <script>
