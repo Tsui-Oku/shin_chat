@@ -340,7 +340,7 @@ function addMsg(who, text, showName, skipLog, imgDataUrl){
     row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+content+'</div><div class="ts">'+t+'</div></div>';
   }
   msgsEl.appendChild(row); scrollBottom();
-  if(!skipLog){ msgLog.push({who,text:text||'',showName,t,imgDataUrl:imgDataUrl||null}); saveMsgLog(); }
+if(!skipLog){ msgLog.push({who,text:text||'',showName,t,imgDataUrl:null}); saveMsgLog(); }
 }
 
 function showTyping(){
