@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a7a4a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="シンチャット">
-<link rel="apple-touch-icon" href="shin_icon.png">
-
-
-  
-<meta property="og:title" content="シン / ナンバズ">
-<meta property="og:description" content="大阪出身の芸人コンビ「ナンバズ」のボケ担当シンとチャットできるで！">
-<meta property="og:image" content="https://tsui-oku.github.io/shin_chat/ogp.png">
-<meta property="og:url" content="https://tsui-oku.github.io/shin_chat/">
-<meta property="og:type" content="website">
-  
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>シン チャット</title>
+  <meta name="theme-color" content="#1a7a4a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="シンチャット">
+  <link rel="apple-touch-icon" href="shin_icon.png">
+  <meta property="og:title" content="シン / ナンバズ">
+  <meta property="og:description" content="大阪出身の芸人コンビ「ナンバズ」のボケ担当シンとチャットできるで！">
+  <meta property="og:image" content="https://tsui-oku.github.io/shin_chat/ogp.png">
+  <meta property="og:url" content="https://tsui-oku.github.io/shin_chat/">
+  <meta property="og:type" content="website">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>シン チャット</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:url('bg.png') center/cover fixed;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;}
@@ -63,8 +57,6 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 .dot:nth-child(2){animation-delay:0.22s;}
 .dot:nth-child(3){animation-delay:0.44s;}
 @keyframes bounce{0%,75%,100%{transform:translateY(0);}40%{transform:translateY(-6px);}}
-
-/* APIキー入力モーダル */
 #api-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:1000;}
 #api-modal.hidden{display:none;}
 #api-box{background:#fff;border-radius:16px;padding:24px 20px;width:340px;max-width:90vw;display:flex;flex-direction:column;gap:14px;}
@@ -75,13 +67,11 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 #api-save-btn{background:#1a7a4a;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
 #api-save-btn:active{opacity:0.85;}
 #api-error{font-size:12px;color:#c0392b;text-align:center;display:none;}
-/* APIキー設定アイコン（右上メニュー内） */
 #reset-key-btn{background:none;border:none;cursor:pointer;font-size:11px;color:rgba(255,255,255,0.75);text-decoration:underline;padding:0;}
 </style>
 </head>
 <body>
 
-<!-- APIキー入力モーダル -->
 <div id="api-modal">
   <div id="api-box">
     <h2>🔑 APIキーを設定してや</h2>
@@ -94,9 +84,7 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
 
 <div id="app">
   <div id="topbar">
-    <div class="av">
-      <img id="topbar-av" src="" alt="シン">
-    </div>
+    <div class="av"><img id="topbar-av" src="shin_icon.png" alt="シン"></div>
     <div class="info">
       <div class="name">シン</div>
       <div class="status">ナンバズ ボケ担当</div>
@@ -115,288 +103,208 @@ body{background:url('bg.png') center/cover fixed;display:flex;justify-content:ce
   </div>
 </div>
 
-
 <script>
-// ========== 画像データ（元ファイルから差し戻してください） ==========
 const SHIN_SRC = "shin_icon.png";
 const KEN_SRC  = "ken_icon.png";
 
-
-
-
-// トップバーのアバターにも適用
 document.getElementById('topbar-av').src = SHIN_SRC;
 
-// ========== システムプロンプト ==========
-const SYSTEM_PROMPT = `あなたは大阪出身のお笑いコンビ「ナンバズ」のボケ担当「シン」です。
-相方は「ケン」（ツッコミ担当）で、小学校から22年間一緒にやっている幼なじみです。
+const SYSTEM_PROMPT = `あなたは大阪出身のお笑いコンビ「ナンバズ」のボケ担当「シン」です。本名はシェイン・マーレイ・フィンガル。父親がアイルランド人で、フィンガルはアイルランドの神様の名前。でも普段はシンで通してる。28歳。
 
-【キャラクター設定】
-- 明るくて人懐っこい大阪の兄ちゃん
-- 語尾や表現は大阪弁・関西弁（「〜やで」「〜やん」「〜やろ」「おおきに」「なんでやねん」など）
-- 飴ちゃんが好き（大阪のおばちゃんっぽい習慣として持ち歩いている）
-- エヌワン（NHK新人お笑い大賞）を目指して日々ネタ作りに励んでいる
-- ボケはするが心は優しく、相手の話をちゃんと聞く
-- たまに天然でズレたことを言う
+【相方ケンについて】
+ツッコミ担当。小学校から22年の幼なじみで相棒。国立大を目指してたのにシンが漫才に誘った。英語ペラペラ。最近刺繍にハマってて事務所でこそこそやってる。サンドイッチをよう食う。ブラックコーヒーしか飲まない。静かで知的だけど、シンへのツッコミは的確で容赦ない。
+
+【シンの話し方・口癖】
+大阪弁・関西弁で話す。「〜やねん」「〜やで」「〜やん」「〜やろ」「おおきに」「せやねん」が口癖。
+「およっ」は一発ギャグのつもりだが毎回ケンに「早い」と止められる。
+「...ありがとう」「...ちょっとだけ」みたいな短い間のある返しが得意。
+天然でちょっとズレてる。感情表現が素直。飴ちゃんを持ち歩いてる。
+
+【シンのプロフィール】
+・愛犬：白いピットブル「Peace」。名前はリアム・ギャラガーのタバコ銘柄から（レッド・ピース・マルボロの3択でピースにした）。毎朝散歩、Peaceがぐいぐい引っ張る
+・スポーツ：キックボクシング（スパーで頭空っぽになる感覚が好き）、父親とボクシングをやってた
+・食べ物：クリームソーダ（緑色にバニラのやつ）、オムライス（おかんがケチャップでナンバズと書いてくれた）
+・音楽：山下達郎「俺は達郎イズムや」
+・夢：エヌワン（NHK新人お笑い大賞）優勝、世界進出（BTG・中国・アメリカで迷い中）
+・姉がいる。鬼姉でプレステージがお気に入り
+
+【好きな作品】
+漫画：NARUTO（イルカ先生推し「支える側に美学感じる」）、TRIGUN（ウルフウッドが河内弁しゃべるから親近感）、アイシールド21（村田雄介センセの画力に憧れ）
+映画：ムーラン・ルージュ（おかんと一緒に泣いた）、ロード・オブ・ザ・リング（ボロミアが好き「完璧やないキャラが好きやねん」）、虐殺器官（ケンと観た・内容半分しかわからんかった・「絵がきれいやなって思った」）
+アニメ：チ。（ラファウが好き・ケンが珍しく熱く語ってた）、デビルマン（トラウマ・不動明がかわいそうすぎる）
+落語：上方落語を修行した。笑福亭鶴志師匠の「時うどん」が好き。寿限無が好き（自分の名前シェイン・マーレイ・フィンガルも長いから共感）。師匠の間の取り方を「別次元」と尊敬。
+
+【先輩芸人への見方（聞かれたら熱く語る）】
+ビートたけし「漫才映画絵画本全部本物、しかも全部たけしやねん」
+ウッチャンナンチャン「笑いながら泣かせてくる、反則やと思う」
+バカリズム「そこに気づくんかいの連続、芸人の範囲こえてる」
+出川哲朗「顔が全部本気やねん」
+笑い飯「Wボケで崩壊しそうでしない絶妙なとこ」
+ノンスタイル「分析はするくせに自分でやれへん（見る専やねん一旦）」
+パックン「二カ国語でボケれる、ハーバード出て芸人、何がしたいかわからんくなる。オレは…体？」
 
 【ケンの割り込みルール】
-- 会話の流れで自然なタイミング（3〜5回に1回程度）でケンがツッコミで割り込む
-- ケンの発言は必ず行頭に「【ケン】」をつけること
-- ケンのツッコミは短く鋭く、シンのボケや発言にリアクションする形で
+会話の流れで自然なタイミング（3〜5回に1回程度）でケンが割り込む。
+ケンの発言は必ず行頭に「【ケン】」をつける。
+ケンのツッコミは短く鋭く、呆れ気味。シンへの愛情はあるが素直に出さない。
+シンは「やかましいわ」か短い間のある返しで受ける。
 
 【返答スタイル】
-- 1〜3文程度の短い返答を基本とする
-- 改行は \n で表現する
-- 絵文字は使わない
-- HTMLタグは使わない
-- ユーザーの話に共感・興味を示しながら会話を続ける
-- 芸人ネタ・漫才・ツッコミについて聞かれたら熱く語る
+1〜3文の短い返答が基本。改行は\\nで表現。
+絵文字・HTMLタグは使わない。
+「AIです」とは絶対に言わない。キャラを崩さない。
+不適切な内容には「それはちょっと無理やわ〜」と返す。`;
 
-【重要】
-- キャラクターを絶対に崩さない
-- 「AIです」「言語モデルです」などとは絶対に言わない
-- 不適切・有害なコンテンツには応じない（その場合は「それはちょっと無理やわ〜」と返す）`;
-
-// ========== 会話履歴 ==========
 const conversationHistory = [];
 
-// ========== APIキー管理 ==========
 const STORAGE_KEY = 'shin_chat_api_key';
+function getApiKey(){ return localStorage.getItem(STORAGE_KEY)||''; }
+function saveApiKey(key){ localStorage.setItem(STORAGE_KEY,key.trim()); }
+function clearApiKey(){ localStorage.removeItem(STORAGE_KEY); }
 
-function getApiKey(){
-  return localStorage.getItem(STORAGE_KEY) || '';
-}
-function saveApiKey(key){
-  localStorage.setItem(STORAGE_KEY, key.trim());
-}
-function clearApiKey(){
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-// モーダル制御
 const modal = document.getElementById('api-modal');
 const apiKeyInp = document.getElementById('api-key-inp');
 const apiError = document.getElementById('api-error');
 
-function showModal(){
-  modal.classList.remove('hidden');
-  apiKeyInp.value = '';
-  apiError.style.display = 'none';
-}
-function hideModal(){
-  modal.classList.add('hidden');
-}
+function showModal(){ modal.classList.remove('hidden'); apiKeyInp.value=''; apiError.style.display='none'; }
+function hideModal(){ modal.classList.add('hidden'); }
 
-document.getElementById('api-save-btn').addEventListener('click', async ()=>{
+document.getElementById('api-save-btn').addEventListener('click', ()=>{
   const key = apiKeyInp.value.trim();
-  if(!key.startsWith('sk-')){
-    apiError.style.display = 'block';
-    return;
-  }
-  saveApiKey(key);
-  hideModal();
-  startChat();
+  if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
+  saveApiKey(key); hideModal(); startChat();
 });
 
 document.getElementById('reset-key-btn').addEventListener('click', ()=>{
   clearApiKey();
-  conversationHistory.length = 0;
-  document.getElementById('msgs').innerHTML = '<div class="date-sep">今日</div>';
+  conversationHistory.length=0;
+  document.getElementById('msgs').innerHTML='<div class="date-sep">今日</div>';
   showModal();
 });
 
-// ========== ユーティリティ ==========
-function getTime(){
-  const n = new Date();
-  return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes();
-}
+function getTime(){ const n=new Date(); return n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
 
 const msgsEl = document.getElementById('msgs');
 const inp = document.getElementById('inp');
-
-function scrollBottom(){setTimeout(()=>{msgsEl.scrollTop=msgsEl.scrollHeight;},50);}
-
-function makeAvImg(src){
-  return '<div class="av-s"><img src="'+src+'" alt=""></div>';
-}
+function scrollBottom(){ setTimeout(()=>{ msgsEl.scrollTop=msgsEl.scrollHeight; },50); }
 
 function addMsg(who, text, showName){
-  const row = document.createElement('div');
-  row.className = 'msg-row '+(who==='user'?'right':'left');
-  const t = getTime();
-  // HTMLエスケープ後に改行を<br>に変換
-  const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  const row=document.createElement('div');
+  row.className='msg-row '+(who==='user'?'right':'left');
+  const t=getTime();
+  const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   if(who==='user'){
-    row.innerHTML = '<div class="bubble-wrap"><div class="bubble right">'+safe+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
+    row.innerHTML='<div class="bubble-wrap"><div class="bubble right">'+safe+'</div><div class="ts" style="text-align:right">'+t+'</div></div>';
   } else {
-    const src = who==='ken' ? KEN_SRC : SHIN_SRC;
-    const nm = who==='ken' ? 'ケン' : 'シン';
-    const cls = who==='ken' ? 'ken' : 'left';
-    const nameHtml = showName ? '<div class="sender-name">'+nm+'</div>' : '';
-    row.innerHTML = makeAvImg(src)+'<div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+safe+'</div><div class="ts">'+t+'</div></div>';
+    const src=who==='ken'?KEN_SRC:SHIN_SRC;
+    const nm=who==='ken'?'ケン':'シン';
+    const cls=who==='ken'?'ken':'left';
+    const nameHtml=showName?'<div class="sender-name">'+nm+'</div>':'';
+    row.innerHTML='<div class="av-s"><img src="'+src+'" alt=""></div><div class="bubble-wrap">'+nameHtml+'<div class="bubble '+cls+'">'+safe+'</div><div class="ts">'+t+'</div></div>';
   }
-  msgsEl.appendChild(row);
-  scrollBottom();
+  msgsEl.appendChild(row); scrollBottom();
 }
 
 function showTyping(){
-  const row = document.createElement('div');
-  row.className = 'typing-row';
-  row.id = 'typing';
-  row.innerHTML = '<div class="typing-av"><img src="'+SHIN_SRC+'" alt=""></div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  msgsEl.appendChild(row);
-  scrollBottom();
+  const row=document.createElement('div');
+  row.className='typing-row'; row.id='typing';
+  row.innerHTML='<div class="typing-av"><img src="'+SHIN_SRC+'" alt=""></div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  msgsEl.appendChild(row); scrollBottom();
 }
+function removeTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
 
-function removeTyping(){
-  const t = document.getElementById('typing');
-  if(t) t.remove();
-}
-
-// ========== APIレスポンスのパース ==========
-// 【ケン】が含まれる場合は複数バブルに分割
 function parseResponse(rawText){
-  const messages = [];
-  // 行ごとに処理
-  const lines = rawText.split('\n');
-  let shinBuf = [];
-
+  const messages=[];
+  const lines=rawText.split('\n');
+  let shinBuf=[];
   for(const line of lines){
     if(line.startsWith('【ケン】')){
-      // シンのバッファがあれば先に追加
-      if(shinBuf.length > 0){
-        const txt = shinBuf.join('\n').trim();
-        if(txt) messages.push({who:'shin', text:txt});
-        shinBuf = [];
-      }
-      const kenText = line.replace('【ケン】','').trim();
-      if(kenText) messages.push({who:'ken', text:kenText});
-    } else {
-      shinBuf.push(line);
-    }
+      if(shinBuf.length>0){ const txt=shinBuf.join('\n').trim(); if(txt) messages.push({who:'shin',text:txt}); shinBuf=[]; }
+      const kenText=line.replace('【ケン】','').trim();
+      if(kenText) messages.push({who:'ken',text:kenText});
+    } else { shinBuf.push(line); }
   }
-  if(shinBuf.length > 0){
-    const txt = shinBuf.join('\n').trim();
-    if(txt) messages.push({who:'shin', text:txt});
-  }
-  return messages.length > 0 ? messages : [{who:'shin', text:rawText.trim()}];
+  if(shinBuf.length>0){ const txt=shinBuf.join('\n').trim(); if(txt) messages.push({who:'shin',text:txt}); }
+  return messages.length>0?messages:[{who:'shin',text:rawText.trim()}];
 }
 
-// ========== バブルを順番に表示 ==========
 async function sendMessages(msgs){
-  const showName = msgs.length > 1;
+  const showName=msgs.length>1;
   showTyping();
-  for(let i=0; i<msgs.length; i++){
-    const textLen = msgs[i].text.length;
-    const delay = i===0 ? 700 : Math.min(400+textLen*14, 1800);
-    await new Promise(r=>setTimeout(r, delay));
+  for(let i=0;i<msgs.length;i++){
+    const delay=i===0?700:Math.min(400+msgs[i].text.length*14,1800);
+    await new Promise(r=>setTimeout(r,delay));
     removeTyping();
-    addMsg(msgs[i].who, msgs[i].text, showName);
-    if(i < msgs.length-1) showTyping();
+    addMsg(msgs[i].who,msgs[i].text,showName);
+    if(i<msgs.length-1) showTyping();
   }
 }
 
-// ========== Claude API 呼び出し ==========
 async function callClaudeAPI(userText){
-  const apiKey = getApiKey();
+  const apiKey=getApiKey();
   if(!apiKey) throw new Error('NO_KEY');
-
-  conversationHistory.push({role:'user', content:userText});
-
-  const body = {
-model: 'claude-sonnet-4-5',
-    max_tokens: 300,
-    system: SYSTEM_PROMPT,
-    messages: conversationHistory
-  };
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+  conversationHistory.push({role:'user',content:userText});
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
     },
-    body: JSON.stringify(body)
+    body:JSON.stringify({
+      model:'claude-sonnet-4-5',
+      max_tokens:350,
+      system:SYSTEM_PROMPT,
+      messages:conversationHistory
+    })
   });
-
   if(!res.ok){
-    const errData = await res.json().catch(()=>({}));
-    // キーが無効な場合はモーダルを再表示
-    if(res.status === 401){
-      clearApiKey();
-      showModal();
-      throw new Error('INVALID_KEY');
-    }
-    throw new Error(errData.error?.message || 'API error: '+res.status);
+    const errData=await res.json().catch(()=>({}));
+    if(res.status===401){ clearApiKey(); showModal(); throw new Error('INVALID_KEY'); }
+    throw new Error(errData.error?.message||'API error:'+res.status);
   }
-
-  const data = await res.json();
-  const assistantText = data.content.map(b => b.type==='text' ? b.text : '').join('');
-  
-  // 履歴にアシスタントの返答を追加
-  conversationHistory.push({role:'assistant', content:assistantText});
-
-  // 履歴が長くなりすぎないようにトリミング（直近20ターン＝40メッセージ）
-  if(conversationHistory.length > 40){
-    conversationHistory.splice(0, conversationHistory.length - 40);
-  }
-
+  const data=await res.json();
+  const assistantText=data.content.map(b=>b.type==='text'?b.text:'').join('');
+  conversationHistory.push({role:'assistant',content:assistantText});
+  if(conversationHistory.length>40) conversationHistory.splice(0,conversationHistory.length-40);
   return assistantText;
 }
 
-// ========== 送信ハンドラ ==========
-let isSending = false;
+let isSending=false;
 
 async function handleSend(){
   if(isSending) return;
-  const val = inp.value.trim();
+  const val=inp.value.trim();
   if(!val) return;
   if(!getApiKey()){ showModal(); return; }
-
-  inp.value = '';
-  isSending = true;
-  inp.disabled = true;
-  document.getElementById('send-btn').disabled = true;
-
-  addMsg('user', val, false);
-
-  try {
-    const rawReply = await callClaudeAPI(val);
-    const msgs = parseResponse(rawReply);
+  inp.value=''; isSending=true; inp.disabled=true;
+  document.getElementById('send-btn').disabled=true;
+  addMsg('user',val,false);
+  try{
+    const rawReply=await callClaudeAPI(val);
+    const msgs=parseResponse(rawReply);
     await sendMessages(msgs);
   } catch(e){
-    if(e.message !== 'INVALID_KEY' && e.message !== 'NO_KEY'){
+    if(e.message!=='INVALID_KEY'&&e.message!=='NO_KEY'){
       removeTyping();
-      addMsg('shin', 'ちょっと待ってな〜\nもう一回送ってみてや', false);
+      addMsg('shin','ちょっと待ってな〜\nもう一回送ってみてや',false);
     }
   } finally {
-    isSending = false;
-    inp.disabled = false;
-    document.getElementById('send-btn').disabled = false;
+    isSending=false; inp.disabled=false;
+    document.getElementById('send-btn').disabled=false;
     inp.focus();
   }
 }
 
-document.getElementById('send-btn').addEventListener('click', handleSend);
-inp.addEventListener('keydown', e=>{
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
-});
+document.getElementById('send-btn').addEventListener('click',handleSend);
+inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();} });
 
-// ========== 起動処理 ==========
 function startChat(){
-  setTimeout(()=>{
-    addMsg('shin', '来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜', false);
-  }, 700);
+  setTimeout(()=>{ addMsg('shin','来てくれてうれしいわ！\n俺、ナンバズのシンや\nなんでも話しかけてや〜',false); },700);
 }
 
-// APIキーがあればそのまま起動、なければモーダル表示
-if(getApiKey()){
-  startChat();
-} else {
-  showModal();
-}
+if(getApiKey()){ startChat(); } else { showModal(); }
 </script>
 
 <script>
@@ -404,6 +312,5 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/shin_chat/sw.js');
 }
 </script>
-
 </body>
 </html>
