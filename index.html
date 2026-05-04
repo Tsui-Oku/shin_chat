@@ -16,7 +16,8 @@
   <title>シン チャット</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:url('bg.png') center/cover fixed;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;}
+body{background:#000;transition:background 0.8s ease;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif;}
+body.unlocked{background:url('bg.png') center/cover fixed;}
 #app{width:390px;height:700px;background:#fff;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.15);position:relative;}
 #topbar{background:#1a7a4a;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
 #topbar .av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.4);}
@@ -269,6 +270,7 @@ document.getElementById('api-save-btn').addEventListener('click', ()=>{
   const key = apiKeyInp.value.trim();
   if(!key.startsWith('sk-')){ apiError.style.display='block'; return; }
   saveApiKey(key); hideModal();
+  document.body.classList.add('unlocked');
   document.getElementById('app').classList.add('ready');
   startChat();
 });
@@ -276,7 +278,7 @@ document.getElementById('menu-btn').addEventListener('click', ()=>{ resetModal.c
 document.getElementById('reset-cancel').addEventListener('click', ()=>{ resetModal.classList.add('hidden'); });
 document.getElementById('reset-confirm').addEventListener('click', ()=>{
   clearApiKey();
-  conversationHistory=[]; msgLog=[]; favor=50;
+  document.body.classList.remove('unlocked');
   saveHistory(); saveMsgLog(); saveFavor(); updateFavorUI();
   document.getElementById('msgs').innerHTML='<div class="date-sep">今日</div>';
   resetModal.classList.add('hidden');
@@ -483,6 +485,7 @@ function startChat(){
 loadHistory();
 updateFavorUI();
 if(getApiKey()){
+  document.body.classList.add('unlocked');
   document.getElementById('app').classList.add('ready');
   restoreMsgs();
   if(msgLog.length===0) startChat();
